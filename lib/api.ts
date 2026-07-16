@@ -45,10 +45,10 @@ export interface QueryResponse {
 
 export interface Session {
   id: string
-  firm_id: string
-  client_name: string
-  audit_type: string
-  tax_year: string
+  firm_id?: string
+  client_name?: string
+  audit_type?: string
+  tax_year?: string
   current_step: string
   context: Record<string, unknown>
   created_at: string
@@ -89,7 +89,7 @@ export const api = {
   getSessions: (firmId: string) =>
     request<Session[]>(`/api/sessions?firm_id=${firmId}`),
 
-  createSession: (data: { firm_id: string; client_name: string; audit_type: string; tax_year: string }) =>
+  createSession: (data: { firm_id?: string; client_name?: string; audit_type?: string; tax_year?: string }) =>
     request<Session>('/api/sessions', { method: 'POST', body: JSON.stringify(data) }),
 
   getSession: (id: string) =>

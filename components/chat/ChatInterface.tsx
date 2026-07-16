@@ -29,7 +29,14 @@ export default function ChatInterface({ sessionId, auditType, firmId }: ChatInte
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  // Falls back to a lazily-created session below so multi-turn history works
+  // even before a firm/session has been picked (firm_id is optional).
+  const [activeSessionId, setActiveSessionId] = useState<string | undefined>(sessionId)
   const bottomRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    setActiveSessionId(sessionId)
+  }, [sessionId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -42,9 +49,15 @@ export default function ChatInterface({ sessionId, auditType, firmId }: ChatInte
     setMessages(prev => [...prev, { role: 'user', content: q }])
     setLoading(true)
     try {
+      let sid = activeSessionId
+      if (!sid) {
+        const session = await api.createSession({ firm_id: firmId })
+        sid = session.id
+        setActiveSessionId(sid)
+      }
       const res = await api.query({
         question: q,
-        session_id: sessionId,
+        session_id: sid,
         audit_type: auditType,
         firm_id: firmId,
       })
